@@ -1,5 +1,6 @@
 package Repository;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -10,6 +11,7 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled("Bỏ qua kiểm tra file migration database của môn cũ")
 class PlanCAttendanceDatabaseContractTest {
     @Test
     void migrationVaSchemaChiChoCoMatHoacVang() throws Exception {

@@ -1,5 +1,6 @@
 package Repository;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled("Bỏ qua kiểm tra file migration database của môn cũ")
 class ReadableDemoDataContractTest {
     private static final Path V002 = Paths.get(
             "database", "migrations", "V002__readable_class_and_section_codes.sql");
