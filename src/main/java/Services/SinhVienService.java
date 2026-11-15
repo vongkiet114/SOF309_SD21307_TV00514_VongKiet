@@ -22,9 +22,9 @@ public class SinhVienService {
         this(new SinhVienRepository(), new TaiKhoanRepository(), new TaiKhoanService());
     }
 
-    SinhVienService(SinhVienRepository svRepo,
-                    TaiKhoanRepository tkRepo,
-                    TaiKhoanService tkService) {
+    public SinhVienService(SinhVienRepository svRepo,
+                           TaiKhoanRepository tkRepo,
+                           TaiKhoanService tkService) {
         this.svRepo = svRepo;
         this.tkRepo = tkRepo;
         this.tkService = tkService;

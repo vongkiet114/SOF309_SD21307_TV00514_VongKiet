@@ -16,7 +16,7 @@ public class MonHocService {
         this(new MonHocRepository(), new ChuyenNganhRepository());
     }
 
-    MonHocService(MonHocRepository repo, ChuyenNganhRepository chuyenNganhRepo) {
+    public MonHocService(MonHocRepository repo, ChuyenNganhRepository chuyenNganhRepo) {
         this.repo = repo;
         this.chuyenNganhRepo = chuyenNganhRepo;
     }

@@ -1,0 +1,227 @@
+<%@ page import="Models.TimetableWeek" %>
+<%@ page import="Models.TimetableEvent" %>
+<%@ page import="Models.CaHoc" %>
+<%@ page import="Utils.Html" %>
+<%@ page import="java.time.LocalDate" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%!
+    private String normalizeFilterQuery(Object rawValue) {
+        if (rawValue == null) return "";
+        StringBuilder normalized = new StringBuilder();
+        String raw = String.valueOf(rawValue);
+        for (String pair : raw.split("&")) {
+            int separator = pair.indexOf('=');
+            if (separator <= 0 || separator == pair.length() - 1) continue;
+            String name = pair.substring(0, separator);
+            String value = pair.substring(separator + 1);
+            if (("maHocKy".equals(name) || "maLhp".equals(name)
+                    || "maGiangVien".equals(name) || "maPhong".equals(name))
+                    && value.matches("[1-9][0-9]*")) {
+                normalized.append('&').append(name).append('=').append(value);
+            }
+        }
+        return normalized.toString();
+    }
+
+    private String timetableDayLabel(LocalDate day) {
+        if (day == null) return "";
+        switch (day.getDayOfWeek()) {
+            case MONDAY: return "Thứ 2";
+            case TUESDAY: return "Thứ 3";
+            case WEDNESDAY: return "Thứ 4";
+            case THURSDAY: return "Thứ 5";
+            case FRIDAY: return "Thứ 6";
+            case SATURDAY: return "Thứ 7";
+            default: return "Chủ nhật";
+        }
+    }
+
+    private String timetableEventState(TimetableEvent event) {
+        String category = event.getCategoryLabel();
+        String status = event.getStatusLabel();
+        if (category.isEmpty()) return status;
+        return status.isEmpty() ? category : category + " · " + status;
+    }
+
+    private String timetableEventAccessibleLabel(TimetableEvent event) {
+        return timetableDayLabel(event.getDate()) + ", " + event.getDate()
+                + ", " + event.getShiftLabel() + ", " + event.getTimeLabel()
+                + ", phòng " + event.getRoomName() + ". "
+                + event.getSectionCode() + " · " + event.getCourseName()
+                + ". " + timetableEventState(event);
+    }
+%>
+<%
+    TimetableWeek timetable = (TimetableWeek) request.getAttribute("timetable");
+    boolean canManage = Boolean.TRUE.equals(request.getAttribute("canManage"));
+    String basePath = String.valueOf(request.getAttribute("timetableBasePath"));
+    String filterQuery = normalizeFilterQuery(request.getAttribute("filterQuery"));
+    String warning = request.getAttribute("timetableWarning") == null
+            ? "" : String.valueOf(request.getAttribute("timetableWarning"));
+    String timetableMode = request.getAttribute("timetableMode") == null
+            ? "" : String.valueOf(request.getAttribute("timetableMode"));
+    String timetableUrl = request.getContextPath() + basePath;
+    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    boolean examMode = "EXAM".equals(timetableMode);
+%>
+<% if (!warning.isEmpty()) { %>
+<div class="bao-canhbao" role="status"><%= Html.escape(warning) %></div>
+<% } %>
+<% if (timetable != null) { %>
+<section class="timetable" aria-label="Thời khóa biểu tuần">
+    <div class="timetable-toolbar">
+        <div class="timetable-week-range">
+            Từ <%= Html.escape(timetable.getWeekStart().format(dateFormat)) %>
+            đến <%= Html.escape(timetable.getWeekEnd().format(dateFormat)) %>
+        </div>
+        <nav class="timetable-week-nav" aria-label="Điều hướng tuần">
+            <a class="nut nut-vien" href="<%= Html.escape(timetableUrl) %>?week=<%= Html.escape(timetable.getPreviousWeekStart()) %><%= Html.escape(filterQuery) %>">Tuần trước</a>
+            <a class="nut nut-vien" href="<%= Html.escape(timetableUrl) %>?week=<%= Html.escape(TimetableWeek.mondayOf(LocalDate.now())) %><%= Html.escape(filterQuery) %>">Hôm nay</a>
+            <a class="nut nut-vien" href="<%= Html.escape(timetableUrl) %>?week=<%= Html.escape(timetable.getNextWeekStart()) %><%= Html.escape(filterQuery) %>">Tuần sau</a>
+        </nav>
+    </div>
+
+    <div class="timetable-legend" aria-label="Chú giải lịch">
+        <% if (examMode) { %>
+            <span class="timetable-legend-item"><span class="timetable-swatch event-exam"></span>Lịch thi</span>
+        <% } else { %>
+            <span class="timetable-legend-item"><span class="timetable-swatch event-class"></span>Học chính</span>
+            <span class="timetable-legend-item"><span class="timetable-swatch event-makeup"></span>Dạy bù</span>
+            <span class="timetable-legend-item"><span class="timetable-swatch event-leave"></span>Xin nghỉ</span>
+            <span class="timetable-legend-item"><span class="timetable-swatch event-cancelled"></span>Đã hủy</span>
+        <% } %>
+    </div>
+
+    <% if (timetable.getEventCount() == 0) { %>
+        <div class="timetable-empty">
+            <p>Tuần này chưa có lịch</p>
+            <% if (timetable.getNearestEventWeekStart() != null) { %>
+                <a class="nut nut-vien" href="<%= Html.escape(timetableUrl) %>?week=<%= Html.escape(timetable.getNearestEventWeekStart()) %><%= Html.escape(filterQuery) %>">Chuyển tới tuần có lịch gần nhất</a>
+            <% } %>
+        </div>
+    <% } else { %>
+        <div class="timetable-grid" role="region" aria-label="Lịch theo ca và ngày">
+            <div class="timetable-grid-head">Ca / Thứ</div>
+            <% for (LocalDate day : timetable.getDays()) { %>
+                <div class="timetable-grid-head"><%= Html.escape(timetableDayLabel(day)) %><br><span><%= Html.escape(day.format(dateFormat)) %></span></div>
+            <% } %>
+            <% for (CaHoc shift : timetable.getShifts()) { %>
+                <div class="timetable-shift">
+                    <strong><%= Html.escape(shift.getTenCa()) %></strong>
+                    <span><%= Html.escape(shift.getGioBatdau()) %> - <%= Html.escape(shift.getGioKetthuc()) %></span>
+                </div>
+                <% for (LocalDate day : timetable.getDays()) { %>
+                    <div class="timetable-cell">
+                        <% for (TimetableEvent event : timetable.getEvents(day, shift.getMaCa())) { %>
+                            <button type="button" class="timetable-event <%= Html.escape(event.getCssClass()) %>"
+                                    data-timetable-event
+                                    data-id="<%= Html.escape(event.getId()) %>"
+                                    data-code="<%= Html.escape(event.getSectionCode()) %>"
+                                    data-course="<%= Html.escape(event.getCourseName()) %>"
+                                    data-date="<%= Html.escape(event.getDate()) %>"
+                                    data-day="<%= Html.escape(timetableDayLabel(event.getDate())) %>"
+                                    data-shift="<%= Html.escape(event.getShiftLabel()) %>"
+                                    data-time="<%= Html.escape(event.getTimeLabel()) %>"
+                                    data-room="<%= Html.escape(event.getRoomName()) %>"
+                                    data-teacher="<%= Html.escape(event.getTeacherName()) %>"
+                                    data-category="<%= Html.escape(event.getCategoryLabel()) %>"
+                                    data-status="<%= Html.escape(event.getStatusLabel()) %>"
+                                    <% if (canManage) {
+                                        String editUrl = timetableUrl + "?action=edit&id=" + event.getId();
+                                    %>
+                                    data-edit-url="<%= Html.escape(editUrl) %>"
+                                    <% } %>
+                                    aria-label="<%= Html.escape(timetableEventAccessibleLabel(event)) %>">
+                                <strong><%= Html.escape(event.getSectionCode()) %></strong>
+                                <span><%= Html.escape(event.getCourseName()) %></span>
+                                <span><%= Html.escape(event.getRoomName()) %> · <%= Html.escape(event.getTimeLabel()) %></span>
+                                <span class="timetable-event-state"><%= Html.escape(timetableEventState(event)) %></span>
+                            </button>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+
+        <div class="timetable-agenda" aria-label="Lịch tuần dạng danh sách">
+            <% for (LocalDate agendaDay : timetable.getDays()) {
+                java.util.List<TimetableEvent> dayEvents = new java.util.ArrayList<>();
+                for (TimetableEvent candidate : timetable.getAllEvents()) {
+                    if (candidate.getDate().equals(agendaDay)) {
+                        dayEvents.add(candidate);
+                    }
+                }
+                if (!dayEvents.isEmpty()) {
+            %>
+                <section class="timetable-agenda-day"
+                        aria-label="<%= Html.escape(timetableDayLabel(agendaDay)) %>, <%= Html.escape(agendaDay.format(dateFormat)) %>">
+                    <h3 class="timetable-agenda-heading">
+                        <%= Html.escape(timetableDayLabel(agendaDay)) %>, <%= Html.escape(agendaDay.format(dateFormat)) %>
+                    </h3>
+                    <div class="timetable-agenda-events">
+                        <% for (TimetableEvent event : dayEvents) { %>
+                            <button type="button" class="timetable-event <%= Html.escape(event.getCssClass()) %>"
+                                    data-timetable-event
+                                    data-id="<%= Html.escape(event.getId()) %>"
+                                    data-code="<%= Html.escape(event.getSectionCode()) %>"
+                                    data-course="<%= Html.escape(event.getCourseName()) %>"
+                                    data-date="<%= Html.escape(event.getDate()) %>"
+                                    data-day="<%= Html.escape(timetableDayLabel(event.getDate())) %>"
+                                    data-shift="<%= Html.escape(event.getShiftLabel()) %>"
+                                    data-time="<%= Html.escape(event.getTimeLabel()) %>"
+                                    data-room="<%= Html.escape(event.getRoomName()) %>"
+                                    data-teacher="<%= Html.escape(event.getTeacherName()) %>"
+                                    data-category="<%= Html.escape(event.getCategoryLabel()) %>"
+                                    data-status="<%= Html.escape(event.getStatusLabel()) %>"
+                                    <% if (canManage) {
+                                        String editUrl = timetableUrl + "?action=edit&id=" + event.getId();
+                                    %>
+                                    data-edit-url="<%= Html.escape(editUrl) %>"
+                                    <% } %>
+                                    aria-label="<%= Html.escape(timetableEventAccessibleLabel(event)) %>">
+                                <strong><%= Html.escape(event.getSectionCode()) %> · <%= Html.escape(event.getCourseName()) %></strong>
+                                <span><%= Html.escape(event.getShiftLabel()) %> · <%= Html.escape(event.getTimeLabel()) %> · <%= Html.escape(event.getRoomName()) %></span>
+                                <span class="timetable-event-state"><%= Html.escape(timetableEventState(event)) %></span>
+                            </button>
+                        <% } %>
+                    </div>
+                </section>
+            <%  }
+            } %>
+        </div>
+    <% } %>
+</section>
+
+<div class="timetable-drawer" data-timetable-drawer role="dialog" aria-modal="true"
+        aria-hidden="true" aria-labelledby="timetable-detail-title" tabindex="-1">
+    <div class="timetable-drawer-panel">
+        <div class="timetable-drawer-heading">
+            <h2 id="timetable-detail-title">Chi tiết lịch</h2>
+            <button type="button" class="nut nut-vien" data-timetable-close aria-label="Đóng chi tiết lịch">Đóng</button>
+        </div>
+        <dl class="timetable-detail-list">
+            <div><dt>Mã lớp học phần</dt><dd data-detail-code></dd></div>
+            <div><dt>Môn học</dt><dd data-detail-course></dd></div>
+            <div><dt>Ngày</dt><dd data-detail-date></dd></div>
+            <div><dt>Thứ</dt><dd data-detail-day></dd></div>
+            <div><dt>Ca học</dt><dd data-detail-shift></dd></div>
+            <div><dt>Khoảng giờ</dt><dd data-detail-time></dd></div>
+            <div><dt>Phòng</dt><dd data-detail-room></dd></div>
+            <div><dt>Giảng viên</dt><dd data-detail-teacher></dd></div>
+            <div><dt>Loại</dt><dd data-detail-category></dd></div>
+            <div><dt>Trạng thái</dt><dd data-detail-status></dd></div>
+        </dl>
+        <% if (canManage) { %>
+            <div class="timetable-detail-actions">
+                <a data-detail-edit class="nut" href="#">Sửa</a>
+                <form method="post" data-detail-delete action="<%= Html.escape(timetableUrl) %>"
+                        onsubmit="return confirm('Bạn chắc chắn muốn xóa lịch này?');">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" data-detail-id>
+                    <button class="nut nut-do" type="submit">Xóa</button>
+                </form>
+            </div>
+        <% } %>
+    </div>
+</div>
+<% } %>

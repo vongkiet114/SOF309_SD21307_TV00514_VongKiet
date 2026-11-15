@@ -20,7 +20,7 @@ public class TaiKhoanService {
         this(new TaiKhoanRepository(), new VaiTroRepository());
     }
 
-    TaiKhoanService(TaiKhoanRepository repo, VaiTroRepository vaiTroRepository) {
+    public TaiKhoanService(TaiKhoanRepository repo, VaiTroRepository vaiTroRepository) {
         this.repo = repo;
         this.vaiTroRepository = vaiTroRepository;
     }

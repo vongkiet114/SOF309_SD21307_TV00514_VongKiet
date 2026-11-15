@@ -1,0 +1,131 @@
+/* =====================================================================
+   css cho trang dang nhap qlsv
+   thiet ke: 2 cot (panel xanh ben trai + form dang nhap ben phai)
+   Design System: Tối ưu UI/UX, Glassmorphism, Micro-animations.
+   ===================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --mau-chinh: #3b82f6;       
+    --mau-chinh-dam: #2563eb;
+    --mau-chu: #1e293b;
+    --mau-chu-mo: #64748b;
+    --mau-vien: #e2e8f0;
+    --mau-nen: #f8fafc;
+    
+    /* Shadows */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    color: var(--mau-chu);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* khung trang dang nhap chua 2 cot */
+.khung-dangnhap {
+    display: flex; width: 100%; max-width: 960px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px; overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+/* cot trai: panel mau xanh gioi thieu he thong */
+.panel-trai {
+    flex: 1 1 45%;
+    background: linear-gradient(145deg, var(--mau-chinh) 0%, var(--mau-chinh-dam) 100%);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px; text-align: center;
+    position: relative; overflow: hidden;
+}
+.panel-trai::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 60%);
+    animation: rotate 20s linear infinite;
+}
+@keyframes rotate { 100% { transform: rotate(360deg); } }
+
+.panel-trai .gioi-thieu { position: relative; z-index: 1; }
+.panel-trai .gioi-thieu h1 { font-size: 28px; font-weight: 800; margin: 0 0 16px; line-height: 1.3; letter-spacing: -0.5px;}
+.panel-trai .gioi-thieu p { margin: 0; font-size: 15px; opacity: 0.9; line-height: 1.6; }
+
+/* cot phai: vung chua form dang nhap */
+.panel-phai { flex: 1 1 55%; padding: 56px 48px; }
+.panel-phai h2 { margin: 0 0 8px; font-size: 28px; font-weight: 800; color: var(--mau-chu); letter-spacing: -0.5px;}
+.panel-phai .phu-de { margin: 0 0 32px; color: var(--mau-chu-mo); font-size: 15px; }
+
+/* nhom truong nhap */
+.nhom-nhap { margin-bottom: 20px; }
+.nhom-nhap label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: var(--mau-chu); }
+.nhom-nhap input[type="text"],
+.nhom-nhap input[type="email"],
+.nhom-nhap input[type="password"] {
+    width: 100%; padding: 14px 16px;
+    border: 1px solid var(--mau-vien); border-radius: 12px;
+    font-size: 15px; font-family: inherit; outline: none; background: #fff;
+    transition: all 0.2s ease;
+}
+.nhom-nhap input:focus { border-color: var(--mau-chinh); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+.nhom-nhap input::placeholder { color: #94a3b8; }
+
+/* hang chua "ghi nho" va "quen mat khau" */
+.hang-phu { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; font-size: 14px; }
+.hang-phu label { color: var(--mau-chu-mo); display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;}
+.hang-phu input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--mau-chinh); cursor: pointer; }
+.hang-phu a { color: var(--mau-chinh); font-weight: 600; text-decoration: none; transition: color 0.2s;}
+.hang-phu a:hover { color: var(--mau-chinh-dam); text-decoration: underline; }
+
+/* nut dang nhap chinh */
+.nut-dangnhap {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--mau-chinh) 0%, var(--mau-chinh-dam) 100%);
+    color: #fff; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+.nut-dangnhap:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3); }
+.nut-dangnhap:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2); }
+
+/* duong ke "hoac dang nhap bang" */
+.ngan-cach { display: flex; align-items: center; gap: 16px; margin: 28px 0; color: var(--mau-chu-mo); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;}
+.ngan-cach::before, .ngan-cach::after { content: ""; flex: 1; height: 1px; background: var(--mau-vien); }
+
+/* nut dang nhap google */
+.nut-google {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; padding: 14px; border: 1px solid var(--mau-vien); border-radius: 12px;
+    background: #fff; color: #334155; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer;
+    transition: all 0.2s ease; box-shadow: var(--shadow-sm);
+}
+.nut-google:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* khung bao loi */
+.bao-loi {
+    background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444;
+    color: #b91c1c; padding: 14px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 24px;
+    animation: slideDown 0.3s ease-out; box-shadow: var(--shadow-sm);
+}
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.bao-loi .chi-tiet { margin-top: 8px; font-size: 13px; color: #7f1d1d; word-break: break-word; font-weight: 500; }
+
+/* ===== responsive cho dien thoai ===== */
+@media (max-width: 768px) {
+    .khung-dangnhap { flex-direction: column; max-width: 480px; border-radius: 20px; }
+    .panel-trai { flex: none; padding: 32px 24px; }
+    .panel-trai .gioi-thieu h1 { font-size: 22px; }
+    .panel-phai { padding: 40px 32px; }
+    .panel-phai h2 { font-size: 24px; }
+}

@@ -12,7 +12,7 @@ public class DangNhapController {
         this(new TaiKhoanRepository());
     }
 
-    DangNhapController(TaiKhoanRepository repo) {
+    public DangNhapController(TaiKhoanRepository repo) {
         this.repo = repo;
     }
 
